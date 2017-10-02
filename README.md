@@ -8,8 +8,8 @@ Works with non-negative squish angles only (angle>=0°).
 ## Installation
 1. Make sure you have [Python3](https://www.python.org/downloads/) installed.
 2. Clone directory (you need squish_velocity.py and data.txt)
-3. Run 'pip3 install matplotlib'
-4. Run 'python squish_velocity.py' at the dir containing the files
+3. Run `pip3 install matplotlib`
+4. Run `python squish_velocity.py` at the dir containing the files
 
 ## Usage
 Input numerical values for engine parameters. Program tries to fetch values from *data.txt* if available.
