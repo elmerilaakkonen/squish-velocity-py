@@ -1,4 +1,4 @@
-'''
+"""
 Two stroke squish velocity calculator
 Based on G.P. Blair's method
 ("Design and Simulation of Two-Stroke Engines", 1996, p. 325-330)
@@ -6,19 +6,19 @@ Based on G.P. Blair's method
 Copyright 2017 Elmeri Laakkonen
 
 Licensed under GNU GPLv3
-'''
-
+"""
 
 from math import *
 from tkinter import *
 import tkinter.messagebox as mb
-
 import matplotlib
+
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 GAS_R = 287.058
 GAMMA = 1.401
+
 
 class SquishVelocityCalculator:
     def __init__(self):
@@ -69,6 +69,35 @@ class SquishVelocityCalculator:
         self.calc_button.grid(row=11,column=3,sticky=E, padx=15, pady=15)
         self.read_data()
 
+        # Initial values / placeholders
+        self.sum_energy = 0
+        self.crank_angle = []
+        self.sqv_array = []
+        self.kinetic_energy_array = []
+        self.pressure_max = 0
+        self.max_sqv = 0
+        self.max_deg = 0
+
+        self.bore = 0.00
+        self.stroke = 0.00
+        self.conrod = 0.00
+        self.rpm = 0.00
+        self.exh_timing = 0.00
+        self.cr = 0.00
+        self.sqarea_ratio = 0.00
+        self.sqangle = 0.00
+        self.sqclearance = 0.00
+
+        self.boreMeters = self.bore / 1000
+        self.strokeMeters = self.stroke / 1000
+        self.conrodMeters = self.conrod / 1000
+        self.crank = self.stroke / 2
+        self.crankMeters = self.crank / 1000
+        self.squish_clearance_meters = self.sqclearance / 1000
+
+        self.piston_area = pi * (self.boreMeters ** 2) / 4
+        self.swept_volume = self.piston_area * self.strokeMeters
+
     def initialize(self):
         try:
             self.bore = float(self.bore_entry.get())
@@ -101,8 +130,13 @@ class SquishVelocityCalculator:
              self.bore, self.stroke, self.conrod, self.rpm, self.exh_timing,
              self.cr, self.sqarea_ratio*100, self.sqangle, self.sqclearance
         )
-        with open('data.txt', 'w') as filehandle:
+
+        try:
+            filehandle = open('data.txt', 'w')
             filehandle.write(infostring)
+        except IOError:
+            # couldn't write data.txt
+            mb.showerror('Error', 'Couldn\'t write data.txt')
 
     def piston_position(self, crank_angle):
         CT = self.strokeMeters / 2
@@ -117,7 +151,6 @@ class SquishVelocityCalculator:
         squish_perpendicular_area = self.sqarea_ratio*self.piston_area
         bowl_area = self.piston_area-squish_perpendicular_area
         bowl_diam = sqrt(4*bowl_area/pi)
-        bowl_radius = bowl_diam/2 #pois
 
         squish_radial_radius = (self.boreMeters-bowl_diam)/2
         squish_cone_height = tan(radians(self.sqangle))*squish_radial_radius
@@ -125,7 +158,7 @@ class SquishVelocityCalculator:
         squish_bowl_volume = self.squish_clearance_meters*bowl_area
 
         squish_band_volume = self.squish_clearance_meters*squish_perpendicular_area
-        if self.sqangle>0:
+        if self.sqangle > 0:
             squish_band_volume += squish_cone_volume
 
         bowl_volume = clearance_volume-squish_band_volume-squish_bowl_volume
@@ -140,33 +173,17 @@ class SquishVelocityCalculator:
 
         mass_trapped = pressure_trap * trapped_vol / (GAS_R * temp_trap)
 
-        temp_cyl1 = temp_trap
-        temp_squish1 = temp_cyl1
-        temp_bowl1 = temp_cyl1
-
         pressure_cyl1 = pressure_trap
         pressure_squish1 = pressure_cyl1
         pressure_bowl1 = pressure_cyl1
 
-        # RHO = ratio of heat of...
-        rho_squish1 = pressure_squish1 / (GAS_R * temp_squish1)
-        rho_bowl1 = pressure_bowl1 / (GAS_R * temp_bowl1)
-
         mass_squish1 = mass_trapped * vol_squish1 / vol_cyl1
-        mass_bowl1 = mass_trapped - mass_squish1 #turha(ko?)
 
         degree_step = 1  # step
         dt = degree_step / (6 * self.rpm)  # delta t
 
         angleDown = (360 - self.exh_timing)
-        self.pressure_max = 0
-        self.max_sqv = 0
-        self.max_deg = 0
-        self.sum_energy = 0
 
-        self.crank_angle = []
-        self.sqv_array = []
-        self.kinetic_energy_array = []
         while angleDown <= 360:
             height_exh_open_meters2 = self.piston_position(angleDown)
             dh = height_exh_open_meters1 - height_exh_open_meters2
@@ -186,7 +203,7 @@ class SquishVelocityCalculator:
 
             delms = mass_squish1 - mass_squish2
 
-            hsq = height_exh_open_meters1 + (self.squish_clearance_meters) - 0.5 * dh
+            hsq = height_exh_open_meters1 + self.squish_clearance_meters - 0.5 * dh
             if self.sqangle >= 0: hsq += squish_cone_height
             sql = pi * bowl_diam
             asv = hsq * sql
@@ -207,9 +224,6 @@ class SquishVelocityCalculator:
             height_exh_open_meters1 = height_exh_open_meters2
             vol_squish1 = vol_squish2
             vol_bowl1 = vol_bowl2
-            vol_cyl1 = vol_cyl2
-            pressure_cyl1 = pressure_cyl2
-            temp_cyl1 = temp_cyl2
             mass_squish1 = mass_squish2
             pressure_squish1 = pressure_cyl2
             pressure_bowl1 = pressure_cyl2
@@ -220,19 +234,23 @@ class SquishVelocityCalculator:
     def plot(self):
         fig = plt.figure(0)
         plt.plot(self.crank_angle, self.sqv_array, 'r-')
-        plt.xlabel('Crankshaft angle (° BTDC)')
+        plt.xlabel('Crankshaft angle (deg BTDC)')
         plt.ylabel('Velocity (m/s)')
         plt.title('Squish velocity')
         plt.grid(True)
-        plt.text(2, 2, 'Max sq. v: {:.2f}m/s @{:.2f}°BTDC'.format(self.max_sqv, self.max_deg))
+        plt.text(2, 2, 'Max sq. v: {:.2f}m/s @{:.2f} deg BTDC'.format(self.max_sqv, self.max_deg))
         plt.text(2, 1, "Max squish pressure ratio: {:.4f}".format(self.pressure_max))
         plt.text(2, 0, "Total kinetic energy squished: {:.2f}mJ".format(self.sum_energy * 1000))
         fig.canvas.set_window_title('Squish velocity')
         plt.show()
 
     def read_data(self):
-        with open('data.txt', 'r') as filehandle:
+        try:
+            filehandle = open('data.txt', 'r')
             data_string = filehandle.read()
+        except IOError:
+            # couldn't read data.txt
+            data_string = ""
 
         if len(data_string) > 0:
             data = data_string.split(";")
@@ -245,7 +263,6 @@ class SquishVelocityCalculator:
             self.sqarea_entry.insert(0, data[6])
             self.sqangle_entry.insert(0, data[7])
             self.sqclearance_entry.insert(0, data[8])
-
 
     def start(self):
         self.__window.mainloop()
