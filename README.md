@@ -12,8 +12,13 @@ Works with non-negative squish angles only (angle>=0°).
 4. Run `python squish_velocity.py` at the dir containing the files
 
 ## Usage
-Input numerical values for engine parameters. Program tries to fetch values from *data.txt* if available.
+Input numerical values for engine parameters. Program tries to fetch values from *data.txt* if available.<br />
 The program saves values to *data.txt* automatically when "Calculate" is clicked for ease of use.
+
+<p align="center"> 
+<img alt="squish velocity inputs" src=https://i.imgur.com/NLVRF17.png>
+<img alt="squish velocity results" src=https://i.imgur.com/UsFNt6K.png>
+</p>
 
 ### License
 Licensed under GPLv3.
