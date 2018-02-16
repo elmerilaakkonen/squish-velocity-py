@@ -1,6 +1,6 @@
 # Two-stroke engine squish velocity calculator
 
-Based on G.P. Blair's method presented in the book "Design and Simulation of Two-Stroke Engines".
+Based on G.P. Blair's method presented in the book "Design and Simulation of Two-Stroke Engines".<br />
 Implemented in [Python](https://www.python.org/) using [Tk](https://docs.python.org/3/library/tk.html) and [Matplotlib](http://matplotlib.org/).
 
 Works with non-negative squish angles only (angle>=0°).
