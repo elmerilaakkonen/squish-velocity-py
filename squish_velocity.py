@@ -31,10 +31,10 @@ class SquishVelocityCalculator:
         Label(self.__window, text="Stroke (mm):").grid(row=3, column=0, sticky=W, padx=15)
         Label(self.__window, text="Conrod length (mm):").grid(row=4, column=0, sticky=W, padx=15)
         Label(self.__window, text="RPM:").grid(row=5, column=0, sticky=W, padx=15)
-        Label(self.__window, text="Exhaust timing (°ATDC):").grid(row=6, column=0, sticky=W, padx=15)
+        Label(self.__window, text="Exhaust timing (deg ATDC):").grid(row=6, column=0, sticky=W, padx=15)
         Label(self.__window, text="Compression ratio:").grid(row=7, column=0, sticky=W, padx=15)
         Label(self.__window, text="Squish area ratio (%):").grid(row=8, column=0, sticky=W, padx=15)
-        Label(self.__window, text="Squish angle (°):").grid(row=9, column=0, sticky=W, padx=15)
+        Label(self.__window, text="Squish angle (deg):").grid(row=9, column=0, sticky=W, padx=15)
         Label(self.__window, text="Squish clearance (mm):").grid(row=10, column=0, sticky=W, padx=15)
 
 
